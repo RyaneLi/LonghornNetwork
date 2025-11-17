@@ -1,7 +1,14 @@
 @startuml
 !theme plain
+skinparam linetype ortho
+skinparam StateStartEnd {
+    BackgroundColor black
+    BorderColor black
+}
 
 ' System Initialization Flow
+[*] --> Init
+
 state "Initialization" as Init
 state "Load Students\n(DataParser)" as Load
 state "Build Graph\n(StudentGraph)" as Build
@@ -25,12 +32,19 @@ state "Unpaired Student" as Unpaired
 state "Proposing State" as Proposing
 state "Paired Student" as Paired
 
-Unpaired --> Proposing : has preferences
-Proposing --> Paired : match found
-Proposing --> Unpaired : no match found
-
 Roommate --> Unpaired
-Paired --> MainState
+
+Unpaired --> Decision1 : has preferences
+state Decision1 <<choice>>
+Decision1 --> Proposing : yes
+Decision1 --> Unpaired : no
+
+Proposing --> Decision2
+state Decision2 <<choice>>
+Decision2 --> Paired : match found
+Decision2 --> Unpaired : no match found
+
+Paired --> MainState : Students Paired
 
 ' Friend Request States
 state "Student A (idle)" as IdleA
@@ -58,11 +72,10 @@ state "Students Added" as StudentsAdded
 state "Edges Added\n(if weight > 0)" as EdgesAdded
 state "Complete Graph" as CompleteGraph
 
+Build --> EmptyGraph
 EmptyGraph --> StudentsAdded : add students
 StudentsAdded --> EdgesAdded : calculate connections
 EdgesAdded --> CompleteGraph
-
-Build --> EmptyGraph
 CompleteGraph --> MainState
 
 ' Referral Path Finding States
@@ -72,14 +85,15 @@ state "Target Found\n(student with company)" as TargetFound
 state "No Path Found\n(empty path)" as NoPath
 state "Path Returned" as PathReturned
 
-Start --> Exploring : initialize Dijkstra
-Exploring --> TargetFound : found student with company
-Exploring --> NoPath : no path exists
-TargetFound --> PathReturned : reconstruct path
-
 Referral --> Start
-PathReturned --> MainState
-NoPath --> MainState
+Start --> Exploring : initialize Dijkstra
+Exploring --> Decision3
+state Decision3 <<choice>>
+Decision3 --> TargetFound : found student with company
+Decision3 --> NoPath : no path exists
+TargetFound --> PathReturned : reconstruct path
+NoPath --> PathReturned
+PathReturned --> MainState : Path Found/Not Found
 
 ' Pod Formation States
 state "All Students\nUnassigned" as Unassigned
@@ -87,13 +101,14 @@ state "Forming Pods\n(MST)" as Forming
 state "Pods Formed\n(groups)" as PodsFormed
 state "Isolated Students\n(own pod)" as Isolated
 
-Unassigned --> Forming : Prim's algorithm
-Forming --> PodsFormed : groups created
-Forming --> Isolated : single student
-
 Pod --> Unassigned
-PodsFormed --> MainState
-Isolated --> MainState
+Unassigned --> Forming : Prim's algorithm
+Forming --> Decision4
+state Decision4 <<choice>>
+Decision4 --> PodsFormed : groups created
+Decision4 --> Isolated : single student
+PodsFormed --> MainState : Students Grouped into Pods
+Isolated --> MainState : Students Grouped into Pods
 
 ' Concurrent Operations
 state "Thread Pool Created" as ThreadPool
@@ -102,12 +117,19 @@ state "Chat Thread" as CThread
 state "Other Threads" as OtherThreads
 state "All Threads Complete" as ThreadsComplete
 
-ThreadPool --> FRThread : submit
-ThreadPool --> CThread : submit
-ThreadPool --> OtherThreads : submit
+MainState --> ThreadPool : Start Thread Operations
+ThreadPool --> Decision5 : Thread Type
+state Decision5 <<choice>>
+Decision5 --> FRThread : friend request
+Decision5 --> CThread : chat message
+Decision5 --> OtherThreads : other operations
 FRThread --> ThreadsComplete : synchronized operations
 CThread --> ThreadsComplete : synchronized operations
 OtherThreads --> ThreadsComplete : synchronized operations
+ThreadsComplete --> MainState : All Threads Complete
+
+' Final State
+MainState --> [*]
 
 note right of FRThread
   Thread-safe updates
@@ -120,4 +142,3 @@ note right of CThread
 end note
 
 @enduml
-
