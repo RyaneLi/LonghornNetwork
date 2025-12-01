@@ -1,3 +1,5 @@
+import java.util.concurrent.Semaphore;
+
 /**
  * Thread class for simulating friend request interactions between students.
  * Implements Runnable to allow concurrent friend request processing.
@@ -7,9 +9,11 @@
  */
 public class FriendRequestThread implements Runnable {
     /** The student sending the friend request */
-    private UniversityStudent sender;
+    private final UniversityStudent sender;
     /** The student receiving the friend request */
-    private UniversityStudent receiver;
+    private final UniversityStudent receiver;
+    /** Semaphore for thread-safe friend request output */
+    private static final Semaphore outputSemaphore = new Semaphore(1);
     
     /**
      * Constructs a FriendRequestThread with the specified sender and receiver.
@@ -18,7 +22,6 @@ public class FriendRequestThread implements Runnable {
      * @param receiver The UniversityStudent receiving the friend request
      */
     public FriendRequestThread(UniversityStudent sender, UniversityStudent receiver) {
-        // constructor
         this.sender = sender;
         this.receiver = receiver;
     }
@@ -30,6 +33,14 @@ public class FriendRequestThread implements Runnable {
      */
     @Override
     public void run() {
-        // TODO: Implementation to be completed
+        try {
+            outputSemaphore.acquire();
+            System.out.println("FriendRequest (Thread-safe): " + sender.name + " sent a friend request to " + receiver.name);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            System.err.println("FriendRequest interrupted: " + e.getMessage());
+        } finally {
+            outputSemaphore.release();
+        }
     }
 }

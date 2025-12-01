@@ -8,6 +8,9 @@ import java.util.*;
  * @author LonghornNetwork Team
  */
 public class UniversityStudent extends Student {
+    /** Current assigned roommate */
+    private UniversityStudent currentRoommate;
+
     /**
      * Constructs a new UniversityStudent with the specified attributes.
      * 
@@ -24,14 +27,15 @@ public class UniversityStudent extends Student {
                             String major, double gpa, 
                             List<String> roommatePreferences, 
                             List<String> previousInternships) {
+        this.currentRoommate = null;
         this.name = name;
         this.age = age;
         this.gender = gender;
         this.year = year;
         this.major = major;
         this.gpa = gpa;
-        this.roommatePreferences = roommatePreferences;
-        this.previousInternships = previousInternships;
+        this.roommatePreferences = roommatePreferences == null ? new ArrayList<>() : new ArrayList<>(roommatePreferences);
+        this.previousInternships = previousInternships == null ? new ArrayList<>() : new ArrayList<>(previousInternships);
     }
     
     /**
@@ -47,8 +51,33 @@ public class UniversityStudent extends Student {
      */
     @Override
     public int calculateConnectionStrength(Student other) {
-        // TODO: Implementation to be completed
-        return 0;
+        int strength = 0;
+
+        if (other instanceof UniversityStudent otherStudent) {
+            // Check if they are roommates
+            if (this.currentRoommate != null && this.currentRoommate.equals(otherStudent)) {
+                strength += 4;
+            }
+
+            // Count shared internships
+            for (String internship : this.previousInternships) {
+                if (otherStudent.previousInternships.contains(internship)) {
+                    strength += 3;
+                }
+            }
+
+            // Check if same major
+            if (this.major != null && this.major.equals(otherStudent.major)) {
+                strength += 2;
+            }
+
+            // Check if same age
+            if (this.age == otherStudent.age) {
+                strength += 1;
+            }
+        }
+        
+        return strength;
     }
     
     /**
@@ -57,8 +86,7 @@ public class UniversityStudent extends Student {
      * @return The roommate UniversityStudent, or null if unpaired
      */
     public UniversityStudent getRoommate() {
-        // TODO: Implementation to be completed
-        return null;
+        return currentRoommate;
     }
     
     /**
@@ -67,7 +95,18 @@ public class UniversityStudent extends Student {
      * @param roommate The UniversityStudent to set as roommate
      */
     public void setRoommate(UniversityStudent roommate) {
-        // TODO: Implementation to be completed
+        currentRoommate = roommate;
+    }
+    
+    /**
+     * Returns a string representation of this UniversityStudent.
+     * 
+     * @return A formatted string with all student attributes
+     */
+    @Override
+    public String toString() {
+        return String.format("UniversityStudent{name='%s', age=%d, gender='%s', year=%d, major='%s', GPA=%.1f, roommatePreferences=%s, previousInternships=%s}",
+                name, age, gender, year, major, gpa, roommatePreferences, previousInternships);
     }
 }
 

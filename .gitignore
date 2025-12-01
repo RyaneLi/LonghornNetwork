@@ -1,0 +1,17 @@
+# Compiled class files
+*.class
+
+# IDE files
+.DS_Store
+*.swp
+*.swo
+*~
+
+# Output files
+*.txt
+!README.md
+!*.md
+
+# Archive files
+*.zip
+

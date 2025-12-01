@@ -1,3 +1,5 @@
+import java.util.concurrent.Semaphore;
+
 /**
  * Thread class for simulating chat/messaging interactions between students.
  * Implements Runnable to allow concurrent message processing.
@@ -7,11 +9,13 @@
  */
 public class ChatThread implements Runnable {
     /** The student sending the message */
-    private UniversityStudent sender;
+    private final UniversityStudent sender;
     /** The student receiving the message */
-    private UniversityStudent receiver;
+    private final UniversityStudent receiver;
     /** The message content to be sent */
-    private String message;
+    private final String message;
+    /** Semaphore for thread-safe message output */
+    private static final Semaphore outputSemaphore = new Semaphore(1);
     
     /**
      * Constructs a ChatThread with the specified sender, receiver, and message.
@@ -21,7 +25,6 @@ public class ChatThread implements Runnable {
      * @param message The message content to be sent
      */
     public ChatThread(UniversityStudent sender, UniversityStudent receiver, String message) {
-        // constructor
         this.sender = sender;
         this.receiver = receiver;
         this.message = message;
@@ -34,6 +37,14 @@ public class ChatThread implements Runnable {
      */
     @Override
     public void run() {
-        // TODO: Implementation to be completed
+        try {
+            outputSemaphore.acquire();
+            System.out.println("Chat (Thread-safe): " + sender.name + " to " + receiver.name + ": " + message);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            System.err.println("Chat interrupted: " + e.getMessage());
+        } finally {
+            outputSemaphore.release();
+        }
     }
 }
