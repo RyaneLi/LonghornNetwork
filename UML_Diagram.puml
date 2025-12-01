@@ -1,0 +1,126 @@
+@startuml
+
+abstract class Student {
+    # String name
+    # int age
+    # String gender
+    # int year
+    # String major
+    # double gpa
+    # List<String> roommatePreferences
+    # List<String> previousInternships
+    --
+    + {abstract} calculateConnectionStrength(Student other) : int
+}
+
+class UniversityStudent {
+    - UniversityStudent roommate
+    - List<UniversityStudent> friends
+    - Map<UniversityStudent, List<String>> chatHistory
+    --
+    + UniversityStudent(String, int, String, int, String, double, List<String>, List<String>)
+    + calculateConnectionStrength(Student other) : int
+    + getRoommate() : UniversityStudent
+    + setRoommate(UniversityStudent) : void
+}
+
+class DataParser {
+    + {static} parseStudents(String filename) : List<UniversityStudent>
+}
+
+class GaleShapley {
+    + {static} assignRoommates(List<UniversityStudent> students) : void
+}
+
+class StudentGraph {
+    - Map<UniversityStudent, List<Edge>> adjacencyList
+    --
+    + StudentGraph(List<UniversityStudent>)
+    + addEdge(UniversityStudent, UniversityStudent, int) : void
+    + getNeighbors(UniversityStudent) : List<Edge>
+    + getAllNodes() : List<UniversityStudent>
+    + displayGraph() : void
+}
+
+class Edge {
+    + UniversityStudent neighbor
+    + int weight
+    --
+    + Edge(UniversityStudent, int)
+}
+
+class PodFormation {
+    - StudentGraph graph
+    --
+    + PodFormation(StudentGraph)
+    + formPods(int podSize) : void
+}
+
+class ReferralPathFinder {
+    - StudentGraph graph
+    --
+    + ReferralPathFinder(StudentGraph)
+    + findReferralPath(UniversityStudent start, String targetCompany) : List<UniversityStudent>
+}
+
+class FriendRequestThread {
+    - UniversityStudent sender
+    - UniversityStudent receiver
+    --
+    + FriendRequestThread(UniversityStudent, UniversityStudent)
+    + run() : void
+}
+
+class ChatThread {
+    - UniversityStudent sender
+    - UniversityStudent receiver
+    - String message
+    --
+    + ChatThread(UniversityStudent, UniversityStudent, String)
+    + run() : void
+}
+
+class Main {
+    + {static} main(String[] args) : void
+    + {static} generateTestCase1() : List<UniversityStudent>
+    + {static} generateTestCase2() : List<UniversityStudent>
+    + {static} generateTestCase3() : List<UniversityStudent>
+    + {static} gradeLab(List<UniversityStudent>, int) : int
+}
+
+interface Runnable {
+    + run() : void
+}
+
+' Inheritance relationships
+Student <|-- UniversityStudent
+Runnable <|.. FriendRequestThread
+Runnable <|.. ChatThread
+
+' Main class relationships
+Main --> UniversityStudent
+Main --> StudentGraph
+Main --> GaleShapley
+Main --> ReferralPathFinder
+Main --> FriendRequestThread
+Main --> ChatThread
+
+' DataParser creates UniversityStudent
+DataParser ..> UniversityStudent : creates
+
+' GaleShapley modifies UniversityStudent
+GaleShapley ..> UniversityStudent : modifies
+
+' StudentGraph relationships
+StudentGraph *-- Edge : contains
+StudentGraph --> UniversityStudent
+
+' Algorithm classes use StudentGraph
+PodFormation --> StudentGraph
+ReferralPathFinder --> StudentGraph
+
+' Thread classes interact with UniversityStudent
+FriendRequestThread --> UniversityStudent
+ChatThread --> UniversityStudent
+
+@enduml

@@ -1,8 +1,20 @@
 import java.util.*;
 import java.util.concurrent.*;
 
-// Main.java - Self-contained testing & grading with multiple built‑in test cases.
+/**
+ * Main class for the Longhorn Network application.
+ * Contains self-contained testing and grading functionality with multiple built-in test cases.
+ * Tests StudentGraph, GaleShapley algorithm, multithreading, and ReferralPathFinder.
+ * 
+ * @author LonghornNetwork Team
+ */
 public class Main {
+    /**
+     * Main entry point for the Longhorn Network application.
+     * Runs multiple test cases and calculates an overall score.
+     * 
+     * @param args Command line arguments (not used)
+     */
     public static void main(String[] args) {
         // Create a list of test cases.
         List<List<UniversityStudent>> testCases = new ArrayList<>();
@@ -31,8 +43,13 @@ public class Main {
         System.out.println("\n========================================");
         System.out.println("Average Score across all test cases: " + (overallScore / count));
     }
-
     // Test Case 1: Two groups (Group 1 with four students having mutual preferences, Group 2 with a pair)
+    /**
+     * Generates Test Case 1: Two groups (Group 1 with four students having mutual preferences, 
+     * Group 2 with a pair).
+     * 
+     * @return A list of UniversityStudent objects for test case 1
+     */
     public static List<UniversityStudent> generateTestCase1() {
         List<UniversityStudent> students = new ArrayList<>();
 
@@ -69,6 +86,12 @@ public class Main {
 
     // Test Case 2: Three students in which one has "DummyCompany" as a previous internship.
     // This test case should yield a referral path when searching for "DummyCompany".
+    /**
+     * Generates Test Case 2: Three students in which one has "DummyCompany" as a previous internship.
+     * This test case should yield a referral path when searching for "DummyCompany".
+     * 
+     * @return A list of UniversityStudent objects for test case 2
+     */
     public static List<UniversityStudent> generateTestCase2() {
         List<UniversityStudent> students = new ArrayList<>();
 
@@ -90,6 +113,12 @@ public class Main {
 
     // Test Case 3: Three students where one has no roommate preferences.
     // Two of them can be paired and one remains unpaired.
+    /**
+     * Generates Test Case 3: Three students where one has no roommate preferences.
+     * Two of them can be paired and one remains unpaired.
+     * 
+     * @return A list of UniversityStudent objects for test case 3
+     */
     public static List<UniversityStudent> generateTestCase3() {
         List<UniversityStudent> students = new ArrayList<>();
 

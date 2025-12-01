@@ -1,0 +1,144 @@
+@startuml
+!theme plain
+skinparam linetype ortho
+skinparam StateStartEnd {
+    BackgroundColor black
+    BorderColor black
+}
+
+' System Initialization Flow
+[*] --> Init
+
+state "Initialization" as Init
+state "Load Students\n(DataParser)" as Load
+state "Build Graph\n(StudentGraph)" as Build
+state "Main System State" as MainState
+
+Init --> Load
+Load --> Build
+Build --> MainState
+
+' Main Operations
+state "Roommate Matching\n(GaleShapley)" as Roommate
+state "Pod Formation\n(Prim's Algorithm)" as Pod
+state "Referral Path Finding\n(Dijkstra's Algorithm)" as Referral
+
+MainState --> Roommate
+MainState --> Pod
+MainState --> Referral
+
+' Roommate Matching States
+state "Unpaired Student" as Unpaired
+state "Proposing State" as Proposing
+state "Paired Student" as Paired
+
+Roommate --> Unpaired
+
+Unpaired --> Decision1 : has preferences
+state Decision1 <<choice>>
+Decision1 --> Proposing : yes
+Decision1 --> Unpaired : no
+
+Proposing --> Decision2
+state Decision2 <<choice>>
+Decision2 --> Paired : match found
+Decision2 --> Unpaired : no match found
+
+Paired --> MainState : Students Paired
+
+' Friend Request States
+state "Student A (idle)" as IdleA
+state "Student A Sending" as SendingA
+state "Student B Receiving" as ReceivingB
+state "Both Friends" as Friends
+
+IdleA --> SendingA : sends friend request
+SendingA --> ReceivingB
+ReceivingB --> Friends : accepts
+
+' Chat Interaction States
+state "Student A (idle)" as ChatIdleA
+state "Student A Sending Message" as ChatSendingA
+state "Student B Receiving Message" as ChatReceivingB
+state "Chat History Updated" as ChatUpdated
+
+ChatIdleA --> ChatSendingA : sends message
+ChatSendingA --> ChatReceivingB
+ChatReceivingB --> ChatUpdated : message added
+
+' Graph Building States
+state "Empty Graph" as EmptyGraph
+state "Students Added" as StudentsAdded
+state "Edges Added\n(if weight > 0)" as EdgesAdded
+state "Complete Graph" as CompleteGraph
+
+Build --> EmptyGraph
+EmptyGraph --> StudentsAdded : add students
+StudentsAdded --> EdgesAdded : calculate connections
+EdgesAdded --> CompleteGraph
+CompleteGraph --> MainState
+
+' Referral Path Finding States
+state "Start Student" as Start
+state "Exploring Graph\n(Dijkstra)" as Exploring
+state "Target Found\n(student with company)" as TargetFound
+state "No Path Found\n(empty path)" as NoPath
+state "Path Returned" as PathReturned
+
+Referral --> Start
+Start --> Exploring : initialize Dijkstra
+Exploring --> Decision3
+state Decision3 <<choice>>
+Decision3 --> TargetFound : found student with company
+Decision3 --> NoPath : no path exists
+TargetFound --> PathReturned : reconstruct path
+NoPath --> PathReturned
+PathReturned --> MainState : Path Found/Not Found
+
+' Pod Formation States
+state "All Students\nUnassigned" as Unassigned
+state "Forming Pods\n(MST)" as Forming
+state "Pods Formed\n(groups)" as PodsFormed
+state "Isolated Students\n(own pod)" as Isolated
+
+Pod --> Unassigned
+Unassigned --> Forming : Prim's algorithm
+Forming --> Decision4
+state Decision4 <<choice>>
+Decision4 --> PodsFormed : groups created
+Decision4 --> Isolated : single student
+PodsFormed --> MainState : Students Grouped into Pods
+Isolated --> MainState : Students Grouped into Pods
+
+' Concurrent Operations
+state "Thread Pool Created" as ThreadPool
+state "Friend Request Thread" as FRThread
+state "Chat Thread" as CThread
+state "Other Threads" as OtherThreads
+state "All Threads Complete" as ThreadsComplete
+
+MainState --> ThreadPool : Start Thread Operations
+ThreadPool --> Decision5 : Thread Type
+state Decision5 <<choice>>
+Decision5 --> FRThread : friend request
+Decision5 --> CThread : chat message
+Decision5 --> OtherThreads : other operations
+FRThread --> ThreadsComplete : synchronized operations
+CThread --> ThreadsComplete : synchronized operations
+OtherThreads --> ThreadsComplete : synchronized operations
+ThreadsComplete --> MainState : All Threads Complete
+
+' Final State
+MainState --> [*]
+
+note right of FRThread
+  Thread-safe updates
+  to friend lists
+end note
+
+note right of CThread
+  Thread-safe updates
+  to chat history
+end note
+
+@enduml
